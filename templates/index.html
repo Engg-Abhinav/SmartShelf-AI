@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartShelf AI API</title>
+    <style>
+        /* General Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Arial', sans-serif;
+            color: #f8f9fa;
+            line-height: 1.6;
+            background: url('https://images.unsplash.com/photo-1485988412941-77a35537dae4?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80') no-repeat center center/cover;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .overlay {
+            background-color: rgba(0, 0, 0, 0.6); /* Semi-transparent overlay */
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+        .container {
+            position: relative;
+            z-index: 2;
+            max-width: 800px;
+            width: 90%;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            color: #fff;
+            margin-top: 20px; /* Add top margin */
+        }
+        h1 {
+            font-size: 3em;
+            margin-bottom: 20px;
+        }
+        p {
+            font-size: 1.2em;
+            margin-bottom: 30px;
+        }
+        .upload-form {
+            margin-top: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .file-input-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 10px 0;
+        }
+        .file-input-container input[type="file"] {
+            display: none; /* Hide the default file input */
+        }
+        .file-input-container label {
+            padding: 10px 20px;
+            font-size: 1em;
+            color: white;
+            background: #007bff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .file-input-container label:hover {
+            background: #0056b3;
+        }
+        .file-name {
+            margin-left: 10px;
+            font-size: 1em;
+            color: #fff;
+        }
+        .upload-form button {
+            margin-top: 10px;
+            padding: 10px 20px;
+            font-size: 1em;
+            color: white;
+            background: #28a745;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .upload-form button:hover {
+            background: #218838;
+        }
+        footer {
+            text-align: center;
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
+            color: #d1d1d1;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="overlay"></div>
+    <div class="container">
+        <h1>SmartShelf AI</h1>
+        <p>Process images, detect objects, and group products effortlessly!</p>
+        <div class="upload-form">
+            <h2>Upload an Image</h2>
+            <form id="uploadForm" action="/upload" method="POST" enctype="multipart/form-data">
+                <div class="file-input-container">
+                    <label for="fileInput">Choose File</label>
+                    <input type="file" id="fileInput" name="image" accept="image/*" required>
+                    <span class="file-name" id="fileName">No file chosen</span>
+                </div>
+                <button type="submit">Upload</button>
+            </form>
+        </div>
+    </div>
+    <footer>
+        &copy; 2025 SmartShelf AI. All rights reserved.
+    </footer>
+
+    <script>
+        // JavaScript to display the selected file name
+        document.getElementById('fileInput').addEventListener('change', function (e) {
+            const fileName = e.target.files[0].name;
+            document.getElementById('fileName').textContent = fileName;
+        });
+    </script>
+</body>
+</html>

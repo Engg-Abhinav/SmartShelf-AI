@@ -1,0 +1,5 @@
+shelf/Lib/
+__pycache__/
+*.pyc
+.venv/
+shelf/
