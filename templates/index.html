@@ -15,7 +15,7 @@
             font-family: 'Arial', sans-serif;
             color: #f8f9fa;
             line-height: 1.6;
-            background-image: url('/assets/smart_shelf.jpg');
+            background-image: url('/assets/images/smart_shelf.jpg');
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
@@ -26,7 +26,7 @@
             justify-content: center;
         }
         .overlay {
-            background-color: rgba(0, 0, 0, 0.6); /* Semi-transparent overlay */
+            background-color: rgba(0, 0, 0, 0.6);
             position: absolute;
             top: 0;
             left: 0;
@@ -45,7 +45,7 @@
             box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
             text-align: center;
             color: #fff;
-            margin-top: 20px; /* Add top margin */
+            margin-top: 20px;
         }
         h1 {
             font-size: 3em;
@@ -69,7 +69,7 @@
             margin: 10px 0;
         }
         .file-input-container input[type="file"] {
-            display: none; /* Hide the default file input */
+            display: none;
         }
         .file-input-container label {
             padding: 10px 20px;
@@ -103,6 +103,27 @@
         .upload-form button:hover {
             background: #218838;
         }
+        .progress-container {
+            margin-top: 20px;
+            display: none;
+        }
+        .progress-bar {
+            width: 100%;
+            background-color: rgba(255, 255, 255, 0.3);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        .progress-bar span {
+            display: block;
+            height: 20px;
+            background-color: #28a745;
+            width: 0%;
+            transition: width 0.5s;
+        }
+        .progress-text {
+            margin-top: 5px;
+            font-size: 1.1em;
+        }
         footer {
             text-align: center;
             position: absolute;
@@ -129,16 +150,39 @@
                 <button type="submit">Upload</button>
             </form>
         </div>
+
+        <!-- Progress Bar -->
+        <div class="progress-container" id="progressContainer">
+            <div class="progress-bar">
+                <span id="progressBar"></span>
+            </div>
+            <p class="progress-text" id="progressText">Waiting for processing...</p>
+        </div>
     </div>
     <footer>
         &copy; 2025 SmartShelf AI. All rights reserved.
     </footer>
 
     <script>
-        // JavaScript to display the selected file name
         document.getElementById('fileInput').addEventListener('change', function (e) {
-            const fileName = e.target.files[0].name;
-            document.getElementById('fileName').textContent = fileName;
+            document.getElementById('fileName').textContent = e.target.files[0].name;
+        });
+
+        document.getElementById('uploadForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            document.getElementById('progressContainer').style.display = 'block';
+
+            const eventSource = new EventSource('/progress');
+            eventSource.onmessage = function (event) {
+                const progressText = event.data;
+                document.getElementById('progressText').textContent = progressText;
+                document.getElementById('progressBar').style.width = progressText.match(/\d+/)[0] + '%';
+                if (progressText.includes("100%")) {
+                    eventSource.close();
+                }
+            };
+
+            this.submit();
         });
     </script>
 </body>
