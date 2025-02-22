@@ -97,7 +97,13 @@ def detect_and_save(image_path):
     annotated_image_path = save_annotated_image(image_path, detection_results["detections"])
 
     # Save JSON results
-    json_path = save_json_results("detection_results.json", detection_results)
+    image_filename = os.path.basename(image_path)
+    json_filename = f"detection_{os.path.splitext(image_filename)[0]}.json"
+    json_path = save_json_results(json_filename, detection_results)
+
+    # Verify JSON existence right after saving
+    if not os.path.exists(json_path):
+        print(f"ERROR: JSON file was not saved properly: {json_path}")
 
     # Return both results and paths
     return {
@@ -105,4 +111,3 @@ def detect_and_save(image_path):
         "json_path": json_path,
         "annotated_image_path": annotated_image_path
     }
-

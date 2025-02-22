@@ -25,6 +25,16 @@ def get_results_path(filename):
 def save_json_results(filename, data):
     """Save JSON results to the results directory."""
     file_path = get_results_path(filename)
-    with open(file_path, "w") as json_file:
-        json.dump(data, json_file, indent=4)
+
+    try:
+        with open(file_path, "w") as json_file:
+            json.dump(data, json_file, indent=4)
+        print(f"DEBUG: JSON file saved successfully at {file_path}")
+    except Exception as e:
+        print(f"ERROR: Failed to save JSON file - {e}")
+
+    # Ensure the file actually exists after saving
+    if not os.path.exists(file_path):
+        print(f"ERROR: JSON file missing after saving! {file_path}")
+
     return file_path

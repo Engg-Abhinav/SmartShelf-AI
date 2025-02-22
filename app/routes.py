@@ -48,7 +48,8 @@ def upload_image():
 
         # Define output filenames
         annotated_image_filename = f"annotated_{filename}"
-        detection_json_filename = f"detection_{filename.split('.')[0]}.json"
+        detection_json_filename = f"detection_{os.path.splitext(filename)[0]}.json"
+        detection_json_path = os.path.join(RESULTS_FOLDER, detection_json_filename)
         annotated_image_path = os.path.join(RESULTS_FOLDER, annotated_image_filename)
         detection_json_path = os.path.join(RESULTS_FOLDER, detection_json_filename)
 
@@ -79,14 +80,6 @@ def upload_image():
         
         print(f"DEBUG: Checking if file exists -> {annotated_image_path}: {os.path.exists(annotated_image_path)}")
         print(f"DEBUG: Checking if file exists -> {detection_json_path}: {os.path.exists(detection_json_path)}")
-
-
-        # if not os.path.exists(annotated_image_path) or not os.path.exists(detection_json_path):
-        #     print("ERROR: One or both detection result files are missing!")
-        #     return jsonify({
-        #         "error": f"Failed to save detection results. Check permissions and paths: {annotated_image_path}, {detection_json_path}"
-        #         }), 500
-
 
         if not os.path.exists(grouped_image_path) or not os.path.exists(grouped_json_path):
             return jsonify({"error": "Failed to save grouped results"}), 500
