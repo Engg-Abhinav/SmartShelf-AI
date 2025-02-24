@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify, send_from_directory, render_template, send_file
+from flask import Blueprint, request, jsonify, send_from_directory, render_template, send_file, Response, stream_with_context
 from werkzeug.utils import secure_filename
 import os
 import time
@@ -16,6 +16,26 @@ def home():
     Serve the HTML welcome page at the root endpoint.
     """
     return render_template("index.html")
+
+@routes.route("/assets/<path:filename>")
+def serve_assets(filename):
+    """
+    Serve static asset files.
+    """
+    assets_folder = os.path.join(os.getcwd(), 'assets')
+    return send_from_directory(assets_folder, filename)
+
+@routes.route("/progress")
+def progress():
+    """
+    Simulate and stream progress updates for detection.
+    """
+    def generate():
+        for i in range(1, 101, 10):
+            time.sleep(1)
+            yield f"data: Processing detections: {i}% complete\n\n"
+    
+    return Response(stream_with_context(generate()), mimetype='text/event-stream')
 
 @routes.route("/upload", methods=["POST"])
 def upload_image():
@@ -40,7 +60,6 @@ def upload_image():
         # ✅ Debugging: Print detection_data to check for issues
         print("DEBUG: Detection Data Response:", detection_data)
 
-        # ✅ Ensure detection_results exists before proceeding
         if not detection_data or "detection_results" not in detection_data:
             return jsonify({"error": "Detection failed, no results found"}), 500
 
@@ -49,14 +68,12 @@ def upload_image():
         # Define output filenames
         annotated_image_filename = f"annotated_{filename}"
         detection_json_filename = f"detection_{os.path.splitext(filename)[0]}.json"
-        detection_json_path = os.path.join(RESULTS_FOLDER, detection_json_filename)
         annotated_image_path = os.path.join(RESULTS_FOLDER, annotated_image_filename)
         detection_json_path = os.path.join(RESULTS_FOLDER, detection_json_filename)
 
         # Perform grouping
         grouping_results = group_and_save(image_path, detection_results["detections"])
 
-        # ✅ Ensure grouping_results exists before proceeding
         if not grouping_results or "grouped_image_path" not in grouping_results:
             return jsonify({"error": "Grouping failed, no results found"}), 500
 
@@ -65,26 +82,21 @@ def upload_image():
         grouped_image_path = os.path.join(RESULTS_FOLDER, grouped_image_filename)
         grouped_json_path = os.path.join(RESULTS_FOLDER, grouped_json_filename)
 
-        # ✅ Ensure paths exist before rendering the results page
+        # ✅ Debugging for file existence
         print(f"DEBUG: Checking if annotated image exists at: {annotated_image_path}")
         print(f"DEBUG: Checking if detection JSON exists at: {detection_json_path}")
-        # ✅ Add a delay to ensure files are fully saved before checking
+
         time.sleep(1)
-        
-        # ✅ Retry checking file existence multiple times (handles slow disk writes)
+
         for _ in range(5):
             if os.path.exists(annotated_image_path) and os.path.exists(detection_json_path):
                 break
             print("WARNING: File not found, retrying...")
-            time.sleep(1)  # Wait before retrying
-        
-        print(f"DEBUG: Checking if file exists -> {annotated_image_path}: {os.path.exists(annotated_image_path)}")
-        print(f"DEBUG: Checking if file exists -> {detection_json_path}: {os.path.exists(detection_json_path)}")
+            time.sleep(1)
 
         if not os.path.exists(grouped_image_path) or not os.path.exists(grouped_json_path):
             return jsonify({"error": "Failed to save grouped results"}), 500
 
-        # Render the results page with relative URLs
         return render_template(
             "results.html",
             grouped_image_url=f"/results/{grouped_image_filename}",
@@ -97,15 +109,12 @@ def upload_image():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-
 @routes.route("/results/<filename>")
 def serve_result(filename):
     """
     Serve files from the RESULTS_FOLDER.
     """
     filepath = os.path.join(RESULTS_FOLDER, filename)
-
-    # ✅ Print debug info
     print(f"DEBUG: Serving file at {filepath}")
 
     if not os.path.exists(filepath):
@@ -113,7 +122,6 @@ def serve_result(filename):
         return jsonify({"error": "File not found"}), 404
 
     return send_from_directory(RESULTS_FOLDER, filename)
-
 
 @routes.route("/results/image/<filename>", methods=["GET"])
 def get_result_image(filename):
